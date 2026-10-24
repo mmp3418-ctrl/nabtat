@@ -26,6 +26,11 @@
       --radius: 1.1rem;
       --shadow: 0 20px 50px -28px rgba(0, 0, 0, 0.75);
       --font: "Cairo", ui-sans-serif, system-ui, sans-serif;
+      --tap: 3rem;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-inline: env(safe-area-inset-left, 0px);
+      --bottom-nav-h: 0px;
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -45,10 +50,14 @@
         var(--bg);
       background-attachment: fixed;
       -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: contain;
     }
 
+    body.nav-open { overflow: hidden; touch-action: none; }
+
     button, input, select, textarea { font: inherit; color: inherit; }
-    button { cursor: pointer; }
+    button { cursor: pointer; touch-action: manipulation; }
     a { color: inherit; text-decoration: none; }
     img { max-width: 100%; display: block; }
 
@@ -104,8 +113,8 @@
       align-items: center;
       gap: 0.65rem;
       width: 100%;
-      min-height: 2.75rem;
-      padding: 0.55rem 0.85rem;
+      min-height: var(--tap);
+      padding: 0.65rem 0.85rem;
       border-radius: 0.9rem;
       border: 1px solid transparent;
       background: transparent;
@@ -187,13 +196,43 @@
 
     .menu-btn {
       display: none;
-      width: 2.5rem;
-      height: 2.5rem;
-      border-radius: 0.8rem;
+      width: var(--tap);
+      height: var(--tap);
+      flex-shrink: 0;
+      border-radius: 0.9rem;
       border: 1px solid var(--line);
       background: rgba(255, 255, 255, 0.05);
       color: var(--text);
-      font-size: 1.1rem;
+      padding: 0;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .menu-btn:hover, .menu-btn[aria-expanded="true"] {
+      border-color: rgba(245, 158, 11, 0.45);
+      background: var(--amber-soft);
+    }
+
+    .burger {
+      display: grid;
+      gap: 5px;
+      width: 1.15rem;
+    }
+    .burger span {
+      display: block;
+      height: 2px;
+      border-radius: 2px;
+      background: currentColor;
+      transition: transform 0.25s ease, opacity 0.2s ease;
+      transform-origin: center;
+    }
+    .menu-btn[aria-expanded="true"] .burger span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+    .menu-btn[aria-expanded="true"] .burger span:nth-child(2) { opacity: 0; }
+    .menu-btn[aria-expanded="true"] .burger span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
     }
 
     .topbar-copy { flex: 1; min-width: 0; }
@@ -210,8 +249,8 @@
 
     .field, .select, .textarea {
       width: 100%;
-      min-height: 2.6rem;
-      padding: 0.55rem 0.85rem;
+      min-height: var(--tap);
+      padding: 0.7rem 0.9rem;
       border-radius: 0.85rem;
       border: 1px solid var(--line);
       background: rgba(255, 255, 255, 0.045);
@@ -239,14 +278,15 @@
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      min-height: 2.4rem;
-      padding: 0.3rem 0.8rem;
+      min-height: var(--tap);
+      padding: 0.3rem 0.85rem;
       border-radius: 999px;
       border: 1px solid rgba(52, 211, 153, 0.28);
       background: rgba(52, 211, 153, 0.1);
       color: #a7f3d0;
       font-size: 0.78rem;
       font-weight: 700;
+      white-space: nowrap;
     }
 
     .status-pill i {
@@ -378,7 +418,86 @@
     .filters .select { width: auto; min-width: 150px; }
 
     .table-wrap { padding: 0.35rem; overflow: hidden; }
-    .table-scroll { overflow-x: auto; }
+    .table-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      scrollbar-width: thin;
+    }
+
+    .cards-list {
+      display: none;
+      padding: 0.55rem;
+      gap: 0.65rem;
+    }
+
+    .plant-card {
+      display: grid;
+      gap: 0.75rem;
+      padding: 0.9rem;
+      border-radius: 1rem;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.035);
+      transition: border-color 0.2s, background 0.2s, transform 0.2s;
+    }
+
+    .plant-card:active {
+      transform: scale(0.99);
+      border-color: rgba(245, 158, 11, 0.35);
+      background: rgba(245, 158, 11, 0.06);
+    }
+
+    .plant-card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      min-width: 0;
+    }
+
+    .plant-card .thumb {
+      width: 3.25rem;
+      height: 3.25rem;
+      border-radius: 0.9rem;
+    }
+
+    .plant-card-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.55rem;
+    }
+
+    .meta-block {
+      padding: 0.55rem 0.65rem;
+      border-radius: 0.75rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      min-width: 0;
+    }
+
+    .meta-block span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-bottom: 0.15rem;
+    }
+
+    .meta-block strong {
+      display: block;
+      font-size: 0.86rem;
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .plant-card-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    .plant-card-actions .btn { width: 100%; min-height: var(--tap); }
 
     table {
       width: 100%;
@@ -451,8 +570,8 @@
       align-items: center;
       justify-content: center;
       gap: 0.35rem;
-      min-height: 2.55rem;
-      padding: 0.45rem 1rem;
+      min-height: var(--tap);
+      padding: 0.55rem 1.05rem;
       border-radius: 0.85rem;
       border: 1px solid transparent;
       font-weight: 700;
@@ -485,7 +604,7 @@
     }
     .btn-danger:hover { background: rgba(248, 113, 113, 0.22); }
 
-    .btn-sm { min-height: 2rem; padding: 0.25rem 0.7rem; font-size: 0.78rem; }
+    .btn-sm { min-height: 2.4rem; padding: 0.35rem 0.8rem; font-size: 0.8rem; }
 
     .text-btn {
       border: 0;
@@ -493,7 +612,10 @@
       color: var(--amber-2);
       font-weight: 700;
       font-size: 0.82rem;
-      padding: 0;
+      padding: 0.5rem;
+      min-height: var(--tap);
+      display: inline-flex;
+      align-items: center;
     }
     .text-btn:hover { opacity: 0.85; }
 
@@ -504,6 +626,69 @@
     }
     .inline-form .field { flex: 1; }
 
+    /* Nav scrim + bottom bar */
+    .nav-scrim {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 35;
+      background: rgba(2, 6, 23, 0.58);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.28s ease;
+    }
+    .nav-scrim.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      inset-inline: 0;
+      bottom: 0;
+      z-index: 45;
+      padding: 0.35rem 0.45rem calc(0.35rem + var(--safe-bottom));
+      background: rgba(11, 18, 32, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--line);
+      box-shadow: 0 -16px 40px -28px rgba(0, 0, 0, 0.85);
+    }
+
+    .bottom-nav-inner {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.2rem;
+      max-width: 560px;
+      margin-inline: auto;
+    }
+
+    .bottom-nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.15rem;
+      min-height: 3.35rem;
+      padding: 0.35rem 0.2rem;
+      border: 0;
+      border-radius: 0.85rem;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 700;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .bottom-nav-btn .nav-ico { font-size: 1rem; line-height: 1; }
+    .bottom-nav-btn.active {
+      color: var(--amber-2);
+      background: var(--amber-soft);
+    }
+
     /* Modal */
     .modal-root {
       position: fixed;
@@ -512,6 +697,7 @@
       display: grid;
       place-items: center;
       padding: 1rem;
+      padding-bottom: max(1rem, var(--safe-bottom));
     }
     .modal-root[hidden] { display: none !important; }
 
@@ -520,6 +706,7 @@
       inset: 0;
       background: rgba(2, 6, 23, 0.72);
       backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
     }
 
     .modal {
@@ -527,6 +714,7 @@
       width: min(760px, 100%);
       max-height: min(92dvh, 920px);
       overflow: auto;
+      -webkit-overflow-scrolling: touch;
       animation: modalIn 0.28s ease;
     }
 
@@ -544,22 +732,38 @@
       gap: 0.75rem;
       padding: 1rem 1.15rem;
     }
-    .modal-head { border-bottom: 1px solid var(--line); }
+    .modal-head {
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: rgba(15, 23, 42, 0.94);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
     .modal-head h2 { margin: 0; font-size: 1.05rem; font-weight: 800; }
     .modal-body { padding: 1.05rem 1.15rem; }
     .modal-foot {
       border-top: 1px solid var(--line);
       justify-content: flex-end;
+      flex-wrap: wrap;
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+      background: rgba(15, 23, 42, 0.94);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
 
     .icon-btn {
-      width: 2.4rem;
-      height: 2.4rem;
-      border-radius: 0.8rem;
+      width: var(--tap);
+      height: var(--tap);
+      border-radius: 0.85rem;
       border: 1px solid var(--line);
       background: rgba(255, 255, 255, 0.05);
       color: var(--text);
       transition: 0.18s ease;
+      flex-shrink: 0;
     }
     .icon-btn:hover { border-color: rgba(245, 158, 11, 0.4); }
 
@@ -583,12 +787,19 @@
       display: flex;
       align-items: center;
       gap: 0.55rem;
-      min-height: 2.6rem;
+      min-height: var(--tap);
       color: var(--text);
       font-weight: 600;
     }
 
-    .form-grid .textarea { min-height: 5rem; resize: vertical; }
+    .form-grid label.check input {
+      width: 1.25rem;
+      height: 1.25rem;
+      accent-color: var(--amber);
+      flex-shrink: 0;
+    }
+
+    .form-grid .textarea { min-height: 5.5rem; resize: vertical; }
 
     .section-label {
       grid-column: 1 / -1;
@@ -604,7 +815,7 @@
     .toast-stack {
       position: fixed;
       inset-inline-end: 1rem;
-      bottom: 1rem;
+      bottom: calc(1rem + var(--bottom-nav-h));
       z-index: 100;
       display: grid;
       gap: 0.5rem;
@@ -617,6 +828,7 @@
       border: 1px solid rgba(245, 158, 11, 0.3);
       background: rgba(15, 23, 42, 0.94);
       backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       box-shadow: var(--shadow);
       animation: fadeUp 0.28s ease;
       font-size: 0.86rem;
@@ -624,24 +836,206 @@
     }
     .toast.error { border-color: rgba(248, 113, 113, 0.45); color: #fecaca; }
 
+    /* ── Tablet ── */
     @media (max-width: 1100px) {
       .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .grid-2 { grid-template-columns: 1fr; }
     }
 
-    @media (max-width: 860px) {
+    /* ── Mobile & small tablet (< 768px) ── */
+    @media (max-width: 767.98px) {
+      :root { --bottom-nav-h: calc(4.1rem + var(--safe-bottom)); }
+
       .shell { grid-template-columns: 1fr; }
+
+      .nav-scrim {
+        display: block;
+      }
+
       .sidebar {
         position: fixed;
-        inset: 0 0 0 auto;
-        width: min(280px, 86vw);
-        transform: translateX(-110%);
-        transition: transform 0.28s ease;
+        top: 0;
+        bottom: 0;
+        inset-inline-start: 0;
+        width: min(300px, 88vw);
+        height: 100dvh;
+        height: 100svh;
+        padding-top: calc(1.25rem + var(--safe-top));
+        padding-bottom: calc(1.25rem + var(--safe-bottom));
+        border-inline-end: 1px solid var(--line);
+        border-inline-start: 0;
+        transform: translateX(110%);
+        transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        z-index: 50;
+        box-shadow: -24px 0 60px -28px rgba(0, 0, 0, 0.75);
       }
-      .sidebar.open { transform: translateX(0); }
-      .menu-btn { display: inline-grid; place-items: center; }
+
+      html[dir="rtl"] .sidebar { transform: translateX(110%); }
+      html:not([dir="rtl"]) .sidebar { transform: translateX(-110%); }
+
+      .sidebar.open,
+      html[dir="rtl"] .sidebar.open,
+      html:not([dir="rtl"]) .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .menu-btn { display: inline-grid; }
+
+      .bottom-nav { display: block; }
+
+      .topbar {
+        padding: calc(0.7rem + var(--safe-top)) 0.85rem 0.7rem;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+      }
+
+      .topbar-copy { order: 2; flex: 1 1 calc(100% - 4rem); }
+      .menu-btn { order: 1; }
+      .topbar-actions {
+        order: 3;
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 0.5rem;
+      }
+
+      .topbar-actions .search {
+        width: 100%;
+        grid-column: 1 / -1;
+        min-width: 0;
+      }
+
+      .topbar-actions .status-pill {
+        grid-column: 2;
+        justify-self: end;
+      }
+
+      .topbar-actions .btn-primary {
+        grid-column: 1;
+        width: 100%;
+      }
+
+      .topbar-copy h1 { font-size: 1.05rem; }
+      .topbar-copy p {
+        font-size: 0.74rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .content {
+        padding: 0.85rem;
+        padding-bottom: calc(1rem + var(--bottom-nav-h));
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+        gap: 0.7rem;
+      }
+
+      .stat { padding: 0.95rem 1rem; }
+      .stat-value { font-size: 1.65rem; }
+
+      .filters {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .filters .select {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .toolbar .btn { width: 100%; }
+
+      .table-scroll { display: none; }
+      .cards-list { display: grid; }
+
       .form-grid { grid-template-columns: 1fr; }
-      .search { width: 130px; }
+
+      .inline-form {
+        flex-direction: column;
+      }
+      .inline-form .btn { width: 100%; min-height: var(--tap); }
+
+      .list li {
+        flex-wrap: wrap;
+        padding: 0.85rem;
+        gap: 0.65rem;
+      }
+      .list li .btn { min-height: var(--tap); flex: 1 1 auto; }
+
+      .modal-root {
+        padding: 0;
+        place-items: end center;
+      }
+
+      .modal {
+        width: 100%;
+        max-height: min(94dvh, 100%);
+        border-radius: 1.25rem 1.25rem 0 0;
+        animation: sheetIn 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .modal-sm {
+        width: 100%;
+        border-radius: 1.25rem 1.25rem 0 0;
+      }
+
+      @keyframes sheetIn {
+        from { opacity: 0; transform: translateY(24px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .modal-head, .modal-body, .modal-foot {
+        padding-inline: 1rem;
+      }
+
+      .modal-foot {
+        padding-bottom: calc(0.85rem + var(--safe-bottom));
+        gap: 0.5rem;
+      }
+
+      .modal-foot .btn {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+
+      .btn-sm { min-height: var(--tap); padding: 0.45rem 0.85rem; font-size: 0.84rem; }
+
+      .toast-stack {
+        inset-inline: 0.75rem auto;
+        width: auto;
+        max-width: none;
+      }
+    }
+
+    /* Phones in landscape / narrow tablets keep cards + 2-col stats */
+    @media (max-width: 767.98px) and (min-width: 480px) {
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .plant-card-meta { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    /* Very small phones */
+    @media (max-width: 379.98px) {
+      .bottom-nav-btn { font-size: 0.62rem; }
+      .plant-card-meta { grid-template-columns: 1fr; }
+      .topbar-actions {
+        grid-template-columns: 1fr;
+      }
+      .topbar-actions .status-pill,
+      .topbar-actions .btn-primary {
+        grid-column: 1;
+        width: 100%;
+        justify-self: stretch;
+        justify-content: center;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -653,8 +1047,10 @@
   </style>
 </head>
 <body>
+  <div class="nav-scrim" id="navScrim" aria-hidden="true"></div>
+
   <div class="shell">
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar" id="sidebar" aria-label="القائمة الجانبية">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true">ن</div>
         <div>
@@ -687,13 +1083,15 @@
 
     <div class="main">
       <header class="topbar">
-        <button type="button" class="menu-btn" id="menuBtn" aria-label="القائمة">☰</button>
+        <button type="button" class="menu-btn" id="menuBtn" aria-label="فتح القائمة" aria-controls="sidebar" aria-expanded="false">
+          <span class="burger" aria-hidden="true"><span></span><span></span><span></span></span>
+        </button>
         <div class="topbar-copy">
           <h1 id="pageTitle">نظرة عامة</h1>
           <p id="pageSub">مؤشرات النظام وإدارة محتوى الدليل</p>
         </div>
         <div class="topbar-actions">
-          <input class="field search" id="globalSearch" type="search" placeholder="بحث في النباتات…" autocomplete="off" />
+          <input class="field search" id="globalSearch" type="search" placeholder="بحث في النباتات…" autocomplete="off" enterkeyhint="search" />
           <button type="button" class="btn btn-primary" id="btnNew">+ نبات جديد</button>
           <span class="status-pill"><i></i> متصل</span>
         </div>
@@ -752,7 +1150,7 @@
             <button type="button" class="btn btn-primary" id="btnNew2">+ إضافة نبات</button>
           </div>
           <div class="table-wrap glass">
-            <div class="table-scroll">
+            <div class="table-scroll" aria-label="جدول النباتات">
               <table>
                 <thead>
                   <tr>
@@ -766,6 +1164,7 @@
                 <tbody id="tableBody"></tbody>
               </table>
             </div>
+            <div class="cards-list" id="cardsBody" aria-label="قائمة النباتات"></div>
             <p class="empty" id="tableEmpty" hidden>لا توجد نباتات بعد. أضف أول سجل لبدء الدليل.</p>
           </div>
         </section>
@@ -911,6 +1310,27 @@
       </div>
     </div>
   </div>
+
+  <nav class="bottom-nav" id="bottomNav" aria-label="التنقل السريع">
+    <div class="bottom-nav-inner">
+      <button type="button" class="bottom-nav-btn active" data-view="overview">
+        <span class="nav-ico">◈</span>
+        <span>عامة</span>
+      </button>
+      <button type="button" class="bottom-nav-btn" data-view="plants">
+        <span class="nav-ico">❀</span>
+        <span>النباتات</span>
+      </button>
+      <button type="button" class="bottom-nav-btn" data-view="categories">
+        <span class="nav-ico">▣</span>
+        <span>تصنيفات</span>
+      </button>
+      <button type="button" class="bottom-nav-btn" data-view="activity">
+        <span class="nav-ico">⟳</span>
+        <span>نشاط</span>
+      </button>
+    </div>
+  </nav>
 
   <div class="toast-stack" id="toasts" aria-live="polite"></div>
 
@@ -1077,9 +1497,31 @@
         .replaceAll("'", '&#39;');
     }
 
+    function isMobileNav() {
+      return window.matchMedia('(max-width: 767.98px)').matches;
+    }
+
+    function setNavOpen(open) {
+      const sidebar = $('#sidebar');
+      const scrim = $('#navScrim');
+      const btn = $('#menuBtn');
+      sidebar.classList.toggle('open', open);
+      scrim.classList.toggle('show', open);
+      scrim.setAttribute('aria-hidden', open ? 'false' : 'true');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.setAttribute('aria-label', open ? 'إغلاق القائمة' : 'فتح القائمة');
+      document.body.classList.toggle('nav-open', open && isMobileNav());
+    }
+
+    function closeNav() {
+      setNavOpen(false);
+    }
+
     function setView(view) {
       currentView = view;
-      $$('.nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.view === view));
+      $$('.nav-btn, .bottom-nav-btn').forEach((b) =>
+        b.classList.toggle('active', b.dataset.view === view),
+      );
       $$('.view').forEach((v) => v.classList.toggle('active', v.id === `view-${view}`));
       const map = {
         overview: ['نظرة عامة', 'مؤشرات النظام وإدارة محتوى الدليل'],
@@ -1090,11 +1532,12 @@
       const [t, s] = map[view] || map.overview;
       $('#pageTitle').textContent = t;
       $('#pageSub').textContent = s;
-      $('#sidebar').classList.remove('open');
+      closeNav();
       render();
     }
 
     function openModal(plant = null) {
+      closeNav();
       editingId = plant?.id || null;
       $('#modalTitle').textContent = plant ? 'تعديل نبات' : 'إضافة نبات';
       $('#fId').value = plant?.id || '';
@@ -1303,18 +1746,21 @@
       const rows = filtered();
       const empty = $('#tableEmpty');
       const body = $('#tableBody');
+      const cards = $('#cardsBody');
       if (!rows.length) {
         body.innerHTML = '';
+        cards.innerHTML = '';
         empty.hidden = false;
       } else {
         empty.hidden = true;
         body.innerHTML = rows
           .map((p) => {
             const img = p.coverImageUrl || p.imageUrl || placeholderThumb();
+            const name = p.title || p.arabicName;
             return `<tr>
               <td><div class="plant-cell">
                 <img class="thumb" src="${esc(img)}" alt="" loading="lazy" />
-                <div><div class="item-title">${esc(p.title || p.arabicName)}</div>
+                <div><div class="item-title">${esc(name)}</div>
                 <span class="item-sub">${esc(p.scientificName)}</span></div>
               </div></td>
               <td>${esc(p.category || '—')}</td>
@@ -1325,10 +1771,41 @@
               <td><div class="row-actions">
                 <button type="button" class="btn btn-ghost btn-sm" data-edit="${esc(p.id)}">تعديل</button>
                 <button type="button" class="btn btn-danger btn-sm" data-del="${esc(p.id)}" data-name="${esc(
-                  p.title || p.arabicName,
+                  name,
                 )}">حذف</button>
               </div></td>
             </tr>`;
+          })
+          .join('');
+
+        cards.innerHTML = rows
+          .map((p) => {
+            const img = p.coverImageUrl || p.imageUrl || placeholderThumb();
+            const name = p.title || p.arabicName;
+            const published = p.published !== false;
+            return `<article class="plant-card">
+              <div class="plant-card-top">
+                <img class="thumb" src="${esc(img)}" alt="" loading="lazy" />
+                <div style="min-width:0;flex:1">
+                  <div class="item-title">${esc(name)}</div>
+                  <span class="item-sub">${esc(p.scientificName)}</span>
+                </div>
+                <span class="badge ${published ? 'badge-ok' : 'badge-draft'}">${
+                  published ? 'منشور' : 'مسودة'
+                }</span>
+              </div>
+              <div class="plant-card-meta">
+                <div class="meta-block"><span>التصنيف</span><strong>${esc(p.category || '—')}</strong></div>
+                <div class="meta-block"><span>العناية</span><strong>${esc(p.careDifficulty || '—')}</strong></div>
+                <div class="meta-block"><span>الإضاءة</span><strong>${esc(p.sunlight || '—')}</strong></div>
+              </div>
+              <div class="plant-card-actions">
+                <button type="button" class="btn btn-ghost" data-edit="${esc(p.id)}">تعديل</button>
+                <button type="button" class="btn btn-danger" data-del="${esc(p.id)}" data-name="${esc(
+                  name,
+                )}">حذف</button>
+              </div>
+            </article>`;
           })
           .join('');
       }
@@ -1384,13 +1861,18 @@
     }
 
     function bind() {
-      $$('.nav-btn, .text-btn[data-view]').forEach((btn) => {
+      $$('.nav-btn, .bottom-nav-btn, .text-btn[data-view]').forEach((btn) => {
         btn.addEventListener('click', () => {
           if (btn.dataset.view) setView(btn.dataset.view);
         });
       });
 
-      $('#menuBtn').addEventListener('click', () => $('#sidebar').classList.toggle('open'));
+      $('#menuBtn').addEventListener('click', () => {
+        const open = !$('#sidebar').classList.contains('open');
+        setNavOpen(open);
+      });
+      $('#navScrim').addEventListener('click', closeNav);
+
       $('#btnNew').addEventListener('click', () => openModal());
       $('#btnNew2').addEventListener('click', () => openModal());
       $('#plantForm').addEventListener('submit', upsertPlant);
@@ -1448,9 +1930,14 @@
 
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+          closeNav();
           closeModal();
           closeConfirm();
         }
+      });
+
+      window.addEventListener('resize', () => {
+        if (!isMobileNav()) closeNav();
       });
 
       window.addEventListener('storage', (e) => {
