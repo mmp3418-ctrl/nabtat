@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1220" />
+  <title>نبْتة · لوحة التحكم</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b1220;
+      --bg-elevated: #121a2b;
+      --panel: rgba(18, 26, 43, 0.72);
+      --panel-strong: rgba(15, 23, 42, 0.9);
+      --line: rgba(255, 255, 255, 0.1);
+      --line-strong: rgba(245, 158, 11, 0.35);
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --amber: #f59e0b;
+      --amber-2: #fbbf24;
+      --amber-soft: rgba(245, 158, 11, 0.14);
+      --ok: #34d399;
+      --danger: #f87171;
+      --radius: 1.1rem;
+      --shadow: 0 20px 50px -28px rgba(0, 0, 0, 0.75);
+      --font: "Cairo", ui-sans-serif, system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: var(--font);
+      color: var(--text);
+      line-height: 1.65;
+      background:
+        radial-gradient(ellipse 85% 55% at 0% -10%, rgba(245, 158, 11, 0.16), transparent 55%),
+        radial-gradient(ellipse 60% 45% at 100% 0%, rgba(59, 130, 246, 0.12), transparent 50%),
+        radial-gradient(ellipse 50% 40% at 50% 100%, rgba(15, 23, 42, 0.9), transparent 60%),
+        var(--bg);
+      background-attachment: fixed;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, select, textarea { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      min-height: 100dvh;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100dvh;
+      padding: 1.25rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      background: var(--panel-strong);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-inline-end: 1px solid var(--line);
+      z-index: 40;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.35rem 0.45rem;
+    }
+
+    .brand-mark {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 0.85rem;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: #0b1220;
+      background: linear-gradient(135deg, var(--amber-2), var(--amber));
+      box-shadow: 0 10px 24px -12px rgba(245, 158, 11, 0.85);
+    }
+
+    .brand strong { display: block; font-size: 1.05rem; letter-spacing: -0.01em; }
+    .brand small { display: block; color: var(--muted); font-size: 0.75rem; }
+
+    .nav { display: flex; flex-direction: column; gap: 0.35rem; }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      width: 100%;
+      min-height: 2.75rem;
+      padding: 0.55rem 0.85rem;
+      border-radius: 0.9rem;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 600;
+      transition: 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.04);
+      transform: translateX(-2px);
+    }
+
+    .nav-btn.active {
+      color: var(--amber-2);
+      background: var(--amber-soft);
+      border-color: rgba(245, 158, 11, 0.28);
+      box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.08);
+    }
+
+    .nav-ico {
+      width: 1.35rem;
+      text-align: center;
+      opacity: 0.9;
+      font-size: 0.85rem;
+    }
+
+    .nav-badge {
+      margin-inline-start: auto;
+      min-width: 1.35rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .sidebar-foot {
+      margin-top: auto;
+      display: grid;
+      gap: 0.55rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .link-back {
+      color: var(--amber-2);
+      font-weight: 700;
+      font-size: 0.9rem;
+      transition: opacity 0.2s;
+    }
+    .link-back:hover { opacity: 0.85; }
+
+    .sync-note {
+      margin: 0;
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    /* ── Main ── */
+    .main { min-width: 0; display: flex; flex-direction: column; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.95rem 1.25rem;
+      background: rgba(11, 18, 32, 0.75);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .menu-btn {
+      display: none;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 0.8rem;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      font-size: 1.1rem;
+    }
+
+    .topbar-copy { flex: 1; min-width: 0; }
+    .topbar-copy h1 { margin: 0; font-size: 1.15rem; font-weight: 800; }
+    .topbar-copy p { margin: 0.15rem 0 0; font-size: 0.8rem; color: var(--muted); }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .field, .select, .textarea {
+      width: 100%;
+      min-height: 2.6rem;
+      padding: 0.55rem 0.85rem;
+      border-radius: 0.85rem;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.045);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+
+    .field:hover, .select:hover, .textarea:hover {
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .field:focus, .select:focus, .textarea:focus {
+      border-color: rgba(245, 158, 11, 0.55);
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.14);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .field::placeholder, .textarea::placeholder { color: rgba(148, 163, 184, 0.75); }
+
+    .search {
+      width: min(220px, 40vw);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      min-height: 2.4rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(52, 211, 153, 0.28);
+      background: rgba(52, 211, 153, 0.1);
+      color: #a7f3d0;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .status-pill i {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: var(--ok);
+      box-shadow: 0 0 10px var(--ok);
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+
+    .content { padding: 1.25rem; }
+
+    .view { display: none; animation: fadeUp 0.32s ease; }
+    .view.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .glass {
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat {
+      padding: 1.05rem 1.1rem;
+      transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .stat:hover {
+      transform: translateY(-3px);
+      border-color: var(--line-strong);
+      box-shadow: 0 16px 40px -22px rgba(245, 158, 11, 0.35);
+    }
+
+    .stat-label { display: block; color: var(--muted); font-size: 0.8rem; font-weight: 600; }
+    .stat-value {
+      display: block;
+      margin-top: 0.35rem;
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .stat-value.amber { color: var(--amber-2); }
+    .stat-meta { display: block; margin-top: 0.25rem; color: var(--muted); font-size: 0.74rem; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 0.9rem;
+    }
+
+    .panel { padding: 1rem 1.05rem; }
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.9rem;
+    }
+    .panel-head h2 { margin: 0; font-size: 1rem; font-weight: 800; }
+
+    .list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+
+    .list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.75rem 0.85rem;
+      border-radius: 0.9rem;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      transition: 0.2s ease;
+    }
+
+    .list li:hover {
+      border-color: rgba(245, 158, 11, 0.35);
+      background: rgba(245, 158, 11, 0.06);
+    }
+
+    .item-title { font-weight: 700; font-size: 0.9rem; }
+    .item-sub { display: block; color: var(--muted); font-size: 0.75rem; margin-top: 0.1rem; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      min-height: 2rem;
+      padding: 0.2rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(245, 158, 11, 0.28);
+      background: var(--amber-soft);
+      color: var(--amber-2);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .chip b { color: var(--text); font-weight: 700; opacity: 0.8; }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .filters .select { width: auto; min-width: 150px; }
+
+    .table-wrap { padding: 0.35rem; overflow: hidden; }
+    .table-scroll { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    th, td {
+      padding: 0.9rem 0.75rem;
+      text-align: start;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    tbody tr { transition: background 0.18s ease; }
+    tbody tr:hover { background: rgba(245, 158, 11, 0.05); }
+
+    .plant-cell { display: flex; align-items: center; gap: 0.7rem; min-width: 0; }
+
+    .thumb {
+      width: 2.7rem;
+      height: 2.7rem;
+      border-radius: 0.75rem;
+      object-fit: cover;
+      background: #1e293b;
+      border: 1px solid var(--line);
+      flex-shrink: 0;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.5rem;
+      padding: 0.12rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+    .badge-ok {
+      background: rgba(52, 211, 153, 0.12);
+      color: #6ee7b7;
+      border-color: rgba(52, 211, 153, 0.25);
+    }
+    .badge-draft {
+      background: rgba(251, 191, 36, 0.12);
+      color: #fcd34d;
+      border-color: rgba(251, 191, 36, 0.25);
+    }
+
+    .row-actions { display: flex; gap: 0.35rem; }
+
+    .empty {
+      margin: 0;
+      padding: 2.75rem 1rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      min-height: 2.55rem;
+      padding: 0.45rem 1rem;
+      border-radius: 0.85rem;
+      border: 1px solid transparent;
+      font-weight: 700;
+      transition: 0.18s ease;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--amber-2), var(--amber));
+      color: #0b1220;
+      box-shadow: 0 12px 28px -14px rgba(245, 158, 11, 0.9);
+    }
+    .btn-primary:hover { filter: brightness(1.06); }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--line);
+      color: var(--text);
+    }
+    .btn-ghost:hover {
+      border-color: rgba(245, 158, 11, 0.4);
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    .btn-danger {
+      background: rgba(248, 113, 113, 0.14);
+      border-color: rgba(248, 113, 113, 0.35);
+      color: #fecaca;
+    }
+    .btn-danger:hover { background: rgba(248, 113, 113, 0.22); }
+
+    .btn-sm { min-height: 2rem; padding: 0.25rem 0.7rem; font-size: 0.78rem; }
+
+    .text-btn {
+      border: 0;
+      background: transparent;
+      color: var(--amber-2);
+      font-weight: 700;
+      font-size: 0.82rem;
+      padding: 0;
+    }
+    .text-btn:hover { opacity: 0.85; }
+
+    .inline-form {
+      display: flex;
+      gap: 0.55rem;
+      margin-bottom: 1rem;
+    }
+    .inline-form .field { flex: 1; }
+
+    /* Modal */
+    .modal-root {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: grid;
+      place-items: center;
+      padding: 1rem;
+    }
+    .modal-root[hidden] { display: none !important; }
+
+    .backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.72);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal {
+      position: relative;
+      width: min(760px, 100%);
+      max-height: min(92dvh, 920px);
+      overflow: auto;
+      animation: modalIn 0.28s ease;
+    }
+
+    .modal-sm { width: min(420px, 100%); }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-head, .modal-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 1rem 1.15rem;
+    }
+    .modal-head { border-bottom: 1px solid var(--line); }
+    .modal-head h2 { margin: 0; font-size: 1.05rem; font-weight: 800; }
+    .modal-body { padding: 1.05rem 1.15rem; }
+    .modal-foot {
+      border-top: 1px solid var(--line);
+      justify-content: flex-end;
+    }
+
+    .icon-btn {
+      width: 2.4rem;
+      height: 2.4rem;
+      border-radius: 0.8rem;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      transition: 0.18s ease;
+    }
+    .icon-btn:hover { border-color: rgba(245, 158, 11, 0.4); }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+    }
+
+    .form-grid label {
+      display: grid;
+      gap: 0.4rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .form-grid label.full { grid-column: 1 / -1; }
+
+    .form-grid label.check {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      min-height: 2.6rem;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .form-grid .textarea { min-height: 5rem; resize: vertical; }
+
+    .section-label {
+      grid-column: 1 / -1;
+      margin: 0.35rem 0 0;
+      padding-top: 0.55rem;
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--amber-2);
+      letter-spacing: 0.04em;
+    }
+
+    .toast-stack {
+      position: fixed;
+      inset-inline-end: 1rem;
+      bottom: 1rem;
+      z-index: 100;
+      display: grid;
+      gap: 0.5rem;
+      width: min(320px, calc(100vw - 2rem));
+    }
+
+    .toast {
+      padding: 0.85rem 0.95rem;
+      border-radius: 0.9rem;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      background: rgba(15, 23, 42, 0.94);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+      animation: fadeUp 0.28s ease;
+      font-size: 0.86rem;
+      font-weight: 600;
+    }
+    .toast.error { border-color: rgba(248, 113, 113, 0.45); color: #fecaca; }
+
+    @media (max-width: 1100px) {
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 860px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar {
+        position: fixed;
+        inset: 0 0 0 auto;
+        width: min(280px, 86vw);
+        transform: translateX(-110%);
+        transition: transform 0.28s ease;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .menu-btn { display: inline-grid; place-items: center; }
+      .form-grid { grid-template-columns: 1fr; }
+      .search { width: 130px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">ن</div>
+        <div>
+          <strong>نبْتة</strong>
+          <small>لوحة التحكم</small>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="التنقل">
+        <button type="button" class="nav-btn active" data-view="overview">
+          <span class="nav-ico">◈</span> نظرة عامة
+        </button>
+        <button type="button" class="nav-btn" data-view="plants">
+          <span class="nav-ico">❀</span> دليل النباتات
+          <span class="nav-badge" id="navCount">0</span>
+        </button>
+        <button type="button" class="nav-btn" data-view="categories">
+          <span class="nav-ico">▣</span> التصنيفات
+        </button>
+        <button type="button" class="nav-btn" data-view="activity">
+          <span class="nav-ico">⟳</span> النشاط
+        </button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <a class="link-back" id="backLink" href="./">← العودة للتطبيق</a>
+        <p class="sync-note">المزامنة عبر localStorage · المفتاح المشترك مع دليل النباتات في الموقع</p>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <button type="button" class="menu-btn" id="menuBtn" aria-label="القائمة">☰</button>
+        <div class="topbar-copy">
+          <h1 id="pageTitle">نظرة عامة</h1>
+          <p id="pageSub">مؤشرات النظام وإدارة محتوى الدليل</p>
+        </div>
+        <div class="topbar-actions">
+          <input class="field search" id="globalSearch" type="search" placeholder="بحث في النباتات…" autocomplete="off" />
+          <button type="button" class="btn btn-primary" id="btnNew">+ نبات جديد</button>
+          <span class="status-pill"><i></i> متصل</span>
+        </div>
+      </header>
+
+      <main class="content">
+        <section class="view active" id="view-overview">
+          <div class="stats">
+            <article class="stat glass">
+              <span class="stat-label">إجمالي النباتات</span>
+              <strong class="stat-value" id="statPlants">0</strong>
+              <span class="stat-meta" id="statPublished">منشورة: 0</span>
+            </article>
+            <article class="stat glass">
+              <span class="stat-label">المستخدمون المحليون</span>
+              <strong class="stat-value" id="statUsers">0</strong>
+              <span class="stat-meta">من مفاتيح الجلسة</span>
+            </article>
+            <article class="stat glass">
+              <span class="stat-label">عمليات التعريف</span>
+              <strong class="stat-value" id="statIds">0</strong>
+              <span class="stat-meta">سجلات محلية</span>
+            </article>
+            <article class="stat glass">
+              <span class="stat-label">حالة النظام</span>
+              <strong class="stat-value amber">جاهز</strong>
+              <span class="stat-meta" id="statUpdated">آخر تحديث: —</span>
+            </article>
+          </div>
+
+          <div class="grid-2">
+            <section class="panel glass">
+              <div class="panel-head">
+                <h2>أحدث النباتات</h2>
+                <button type="button" class="text-btn" data-view="plants">عرض الكل</button>
+              </div>
+              <ul class="list" id="recentList"></ul>
+            </section>
+            <section class="panel glass">
+              <div class="panel-head"><h2>التصنيفات النشطة</h2></div>
+              <div class="chips" id="catCloud"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-plants">
+          <div class="toolbar">
+            <div class="filters">
+              <select class="select" id="filterCategory"><option value="">كل التصنيفات</option></select>
+              <select class="select" id="filterPublished">
+                <option value="">الكل</option>
+                <option value="1">منشور</option>
+                <option value="0">مسودة</option>
+              </select>
+            </div>
+            <button type="button" class="btn btn-primary" id="btnNew2">+ إضافة نبات</button>
+          </div>
+          <div class="table-wrap glass">
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>النبات</th>
+                    <th>التصنيف</th>
+                    <th>العناية</th>
+                    <th>الحالة</th>
+                    <th>إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+              </table>
+            </div>
+            <p class="empty" id="tableEmpty" hidden>لا توجد نباتات بعد. أضف أول سجل لبدء الدليل.</p>
+          </div>
+        </section>
+
+        <section class="view" id="view-categories">
+          <section class="panel glass">
+            <div class="panel-head"><h2>إدارة التصنيفات</h2></div>
+            <form class="inline-form" id="catForm">
+              <input class="field" id="catInput" placeholder="اسم تصنيف جديد (مثال: الصباريات)" required />
+              <button class="btn btn-primary" type="submit">إضافة</button>
+            </form>
+            <ul class="list" id="catList"></ul>
+          </section>
+        </section>
+
+        <section class="view" id="view-activity">
+          <section class="panel glass">
+            <div class="panel-head">
+              <h2>سجل النشاط المحلي</h2>
+              <button type="button" class="btn btn-ghost btn-sm" id="refreshActivity">تحديث</button>
+            </div>
+            <ul class="list" id="activityList"></ul>
+          </section>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Plant modal -->
+  <div class="modal-root" id="plantModal" hidden>
+    <div class="backdrop" data-close></div>
+    <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <h2 id="modalTitle">إضافة نبات</h2>
+        <button type="button" class="icon-btn" data-close aria-label="إغلاق">✕</button>
+      </div>
+      <form id="plantForm">
+        <div class="modal-body">
+          <input type="hidden" id="fId" />
+          <div class="form-grid">
+            <label>
+              <span>اسم النبات *</span>
+              <input class="field" id="fTitle" required placeholder="نبتة الثعبان" />
+            </label>
+            <label>
+              <span>الاسم العلمي *</span>
+              <input class="field" id="fScientific" required placeholder="Sansevieria trifasciata" />
+            </label>
+            <label>
+              <span>التصنيف / الفئة</span>
+              <input class="field" id="fCategory" list="catDatalist" placeholder="الداخلي" />
+              <datalist id="catDatalist"></datalist>
+            </label>
+            <label>
+              <span>العائلة</span>
+              <input class="field" id="fFamily" placeholder="Asparagaceae" />
+            </label>
+            <label class="full">
+              <span>رابط صورة الغلاف</span>
+              <input class="field" id="fCover" type="url" placeholder="https://..." />
+            </label>
+            <label class="full">
+              <span>الوصف التفصيلي</span>
+              <textarea class="textarea" id="fDescription" rows="3"></textarea>
+            </label>
+
+            <p class="section-label">إرشادات العناية</p>
+            <label>
+              <span>الإضاءة</span>
+              <select class="select" id="fSunlight">
+                <option>ظل كامل</option>
+                <option>ظل جزئي</option>
+                <option selected>شمس معتدلة</option>
+                <option>شمس كاملة</option>
+              </select>
+            </label>
+            <label>
+              <span>الري</span>
+              <select class="select" id="fWatering">
+                <option>نادراً</option>
+                <option selected>أسبوعياً</option>
+                <option>مرتين أسبوعياً</option>
+                <option>يومياً</option>
+                <option>حسب الحاجة</option>
+              </select>
+            </label>
+            <label>
+              <span>التربة (وصف حر)</span>
+              <input class="field" id="fSoil" placeholder="تربة جيدة التصريف" />
+            </label>
+            <label>
+              <span>درجة الحرارة</span>
+              <input class="field" id="fTemp" placeholder="18–28°م" />
+            </label>
+            <label class="full">
+              <span>خطوات العناية (سطر لكل خطوة)</span>
+              <textarea class="textarea" id="fCare" rows="3" placeholder="ري عند جفاف السطح…"></textarea>
+            </label>
+
+            <p class="section-label">الأمراض والعلاج</p>
+            <label class="full">
+              <span>سطر لكل مرض: الاسم | الأعراض | الوقاية | العلاج</span>
+              <textarea class="textarea" id="fDiseases" rows="3" placeholder="تعفن الجذور | اصفرار وذبول | تصريف جيد | تقليل الري"></textarea>
+            </label>
+            <label class="full">
+              <span>وسوم (مفصولة بفاصلة)</span>
+              <input class="field" id="fTags" placeholder="ظل، سهل العناية" />
+            </label>
+            <label>
+              <span>سهولة العناية</span>
+              <select class="select" id="fDifficulty">
+                <option>سهل</option>
+                <option>متوسط</option>
+                <option>متقدم</option>
+              </select>
+            </label>
+            <label class="check"><input type="checkbox" id="fPopular" /><span>شائع في الرئيسية</span></label>
+            <label class="check"><input type="checkbox" id="fPublished" checked /><span>منشور في الدليل</span></label>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-ghost" data-close>إلغاء</button>
+          <button type="submit" class="btn btn-primary">حفظ ومزامنة</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete confirm -->
+  <div class="modal-root" id="confirmModal" hidden>
+    <div class="backdrop" data-close-confirm></div>
+    <div class="modal glass modal-sm" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <h2>تأكيد الحذف</h2>
+        <button type="button" class="icon-btn" data-close-confirm aria-label="إغلاق">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmText" style="margin:0;color:var(--muted)">هل تريد حذف هذا النبات؟</p>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn btn-ghost" data-close-confirm>إلغاء</button>
+        <button type="button" class="btn btn-danger" id="confirmDelete">حذف</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-stack" id="toasts" aria-live="polite"></div>
+
+  <script>
+  (() => {
+    'use strict';
+
+    /** Must match React app: src/services/plantCatalogStore.ts */
+    const CATALOG_KEY = 'spi.plantCatalog.v1';
+    const CATEGORIES_KEY = 'spi.admin.categories.v1';
+    const DEFAULT_CATEGORIES = [
+      'الداخلي', 'الخارجي', 'الصباريات', 'أعشاب عطرية', 'أشجار مثمرة', 'نباتات زينة',
+    ];
+
+    let catalog = { version: 1, updatedAt: null, plants: [] };
+    let categories = [...DEFAULT_CATEGORIES];
+    let editingId = null;
+    let pendingDeleteId = null;
+    let currentView = 'overview';
+
+    const $ = (s, r = document) => r.querySelector(s);
+    const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+    function readJson(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return fallback;
+        return JSON.parse(raw);
+      } catch {
+        return fallback;
+      }
+    }
+
+    function writeJson(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function uid(prefix = 'plant') {
+      if (crypto?.randomUUID) return `${prefix}-${crypto.randomUUID()}`;
+      return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+    }
+
+    function normalizePlant(raw) {
+      const now = new Date().toISOString();
+      const arabicName = String(raw.arabicName || raw.commonName || raw.title || '').trim();
+      const commonName = String(raw.commonName || raw.arabicName || '').trim();
+      const title = String(raw.title || arabicName || commonName || 'نبات').trim();
+      const imageUrl = String(raw.coverImageUrl || raw.imageUrl || '').trim();
+      const category = String(raw.category || raw.classification || '').trim();
+      const soilNote = String(raw.attributes?.soilNote || raw.soilNote || '').trim();
+
+      return {
+        id: String(raw.id || uid()),
+        title,
+        arabicName: arabicName || title,
+        commonName: commonName || arabicName || title,
+        scientificName: String(raw.scientificName || '').trim(),
+        family: String(raw.family || '').trim(),
+        category,
+        classification: String(raw.classification || category).trim(),
+        description: String(raw.description || '').trim(),
+        imageUrl,
+        coverImageUrl: String(raw.coverImageUrl || imageUrl).trim(),
+        soilTypes: Array.isArray(raw.soilTypes) ? raw.soilTypes : [],
+        environments: Array.isArray(raw.environments) ? raw.environments : [],
+        watering: raw.watering || 'حسب الحاجة',
+        sunlight: raw.sunlight || 'شمس معتدلة',
+        temperatureRange: String(raw.temperatureRange || '').trim(),
+        humidity: String(raw.humidity || '').trim(),
+        careGuide: Array.isArray(raw.careGuide) ? raw.careGuide : [],
+        warnings: Array.isArray(raw.warnings) ? raw.warnings : [],
+        diseases: Array.isArray(raw.diseases) ? raw.diseases : [],
+        tags: Array.isArray(raw.tags) ? raw.tags : [],
+        attributes: {
+          ...(raw.attributes && typeof raw.attributes === 'object' ? raw.attributes : {}),
+          ...(soilNote ? { soilNote } : {}),
+        },
+        careDifficulty: raw.careDifficulty || 'سهل',
+        popular: Boolean(raw.popular),
+        suitableRegions: Array.isArray(raw.suitableRegions) ? raw.suitableRegions : [],
+        published: raw.published !== false,
+        createdAt: raw.createdAt || now,
+        updatedAt: raw.updatedAt || now,
+      };
+    }
+
+    function loadCatalog() {
+      const stored = readJson(CATALOG_KEY, null);
+      if (!stored || typeof stored !== 'object') {
+        catalog = { version: 1, updatedAt: null, plants: [] };
+        return;
+      }
+      catalog = {
+        version: typeof stored.version === 'number' ? stored.version : 1,
+        updatedAt: stored.updatedAt ?? null,
+        plants: Array.isArray(stored.plants)
+          ? stored.plants.filter((p) => p && p.id).map(normalizePlant)
+          : [],
+      };
+    }
+
+    function saveCatalog() {
+      catalog = {
+        version: 1,
+        updatedAt: new Date().toISOString(),
+        plants: catalog.plants.map(normalizePlant),
+      };
+      writeJson(CATALOG_KEY, catalog);
+    }
+
+    function loadCategories() {
+      const stored = readJson(CATEGORIES_KEY, null);
+      const fromPlants = catalog.plants.flatMap((p) => [p.category, p.classification]).filter(Boolean);
+      categories = [...new Set([...DEFAULT_CATEGORIES, ...(Array.isArray(stored) ? stored : []), ...fromPlants])];
+    }
+
+    function saveCategories() {
+      writeJson(CATEGORIES_KEY, categories);
+    }
+
+    function scanActivity() {
+      const users = new Set();
+      let identifications = 0;
+      for (let i = 0; i < localStorage.length; i += 1) {
+        const key = localStorage.key(i);
+        if (!key) continue;
+        if (key.startsWith('spi.favorites.')) users.add(key.replace('spi.favorites.', ''));
+        if (key.startsWith('spi.history.')) {
+          users.add(key.replace('spi.history.', ''));
+          const rows = readJson(key, []);
+          if (Array.isArray(rows)) identifications += rows.length;
+        }
+      }
+      users.delete('guest');
+      return { users: users.size, identifications };
+    }
+
+    function toast(msg, type = 'ok') {
+      const el = document.createElement('div');
+      el.className = `toast${type === 'error' ? ' error' : ''}`;
+      el.textContent = msg;
+      $('#toasts').appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 250);
+      }, 2600);
+    }
+
+    function fmt(iso) {
+      if (!iso) return '—';
+      try {
+        return new Intl.DateTimeFormat('ar', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso));
+      } catch {
+        return iso;
+      }
+    }
+
+    function esc(v) {
+      return String(v ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function setView(view) {
+      currentView = view;
+      $$('.nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.view === view));
+      $$('.view').forEach((v) => v.classList.toggle('active', v.id === `view-${view}`));
+      const map = {
+        overview: ['نظرة عامة', 'مؤشرات النظام وإدارة محتوى الدليل'],
+        plants: ['دليل النباتات', 'إضافة وتعديل وحذف سجلات الدليل'],
+        categories: ['التصنيفات', 'إدارة فئات الدليل'],
+        activity: ['النشاط', 'ملخص سجلات التعريف المحلية'],
+      };
+      const [t, s] = map[view] || map.overview;
+      $('#pageTitle').textContent = t;
+      $('#pageSub').textContent = s;
+      $('#sidebar').classList.remove('open');
+      render();
+    }
+
+    function openModal(plant = null) {
+      editingId = plant?.id || null;
+      $('#modalTitle').textContent = plant ? 'تعديل نبات' : 'إضافة نبات';
+      $('#fId').value = plant?.id || '';
+      $('#fTitle').value = plant?.title || plant?.commonName || plant?.arabicName || '';
+      $('#fScientific').value = plant?.scientificName || '';
+      $('#fCategory').value = plant?.category || plant?.classification || '';
+      $('#fFamily').value = plant?.family || '';
+      $('#fCover').value = plant?.coverImageUrl || plant?.imageUrl || '';
+      $('#fDescription').value = plant?.description || '';
+      $('#fSunlight').value = plant?.sunlight || 'شمس معتدلة';
+      $('#fWatering').value = plant?.watering || 'أسبوعياً';
+      $('#fSoil').value = plant?.attributes?.soilNote || '';
+      $('#fTemp').value = plant?.temperatureRange || '';
+      $('#fCare').value = (plant?.careGuide || []).join('\n');
+      $('#fDiseases').value = (plant?.diseases || [])
+        .map((d) => [d.name, d.symptoms, d.prevention, d.treatment || ''].map((x) => String(x || '').trim()).join(' | '))
+        .join('\n');
+      $('#fTags').value = (plant?.tags || []).join('، ');
+      $('#fDifficulty').value = plant?.careDifficulty || 'سهل';
+      $('#fPopular').checked = Boolean(plant?.popular);
+      $('#fPublished').checked = plant ? plant.published !== false : true;
+      $('#plantModal').hidden = false;
+      $('#fTitle').focus();
+    }
+
+    function closeModal() {
+      $('#plantModal').hidden = true;
+      editingId = null;
+      $('#plantForm').reset();
+      $('#fPublished').checked = true;
+    }
+
+    function openConfirm(id, name) {
+      pendingDeleteId = id;
+      $('#confirmText').textContent = `هل تريد حذف «${name}» نهائياً من الدليل؟`;
+      $('#confirmModal').hidden = false;
+    }
+
+    function closeConfirm() {
+      pendingDeleteId = null;
+      $('#confirmModal').hidden = true;
+    }
+
+    function parseLines(text) {
+      return String(text || '').split('\n').map((l) => l.trim()).filter(Boolean);
+    }
+
+    function parseTags(text) {
+      return String(text || '').split(/[,،]/).map((t) => t.trim()).filter(Boolean);
+    }
+
+    function parseDiseases(text) {
+      return parseLines(text).map((line, i) => {
+        const [name, symptoms, prevention, treatment] = line.split('|').map((p) => p.trim());
+        return {
+          id: `${uid('dis')}-${i}`,
+          name: name || 'مرض',
+          symptoms: symptoms || '',
+          prevention: prevention || '',
+          treatment: treatment || '',
+        };
+      });
+    }
+
+    function upsertPlant(e) {
+      e.preventDefault();
+      const title = $('#fTitle').value.trim();
+      const scientificName = $('#fScientific').value.trim();
+      if (!title || !scientificName) {
+        toast('اسم النبات والاسم العلمي مطلوبان.', 'error');
+        return;
+      }
+
+      const category = $('#fCategory').value.trim() || 'الداخلي';
+      if (!categories.includes(category)) {
+        categories.push(category);
+        saveCategories();
+      }
+
+      const cover = $('#fCover').value.trim();
+      const soilNote = $('#fSoil').value.trim();
+      const now = new Date().toISOString();
+      const existing = editingId ? catalog.plants.find((p) => p.id === editingId) : null;
+
+      const plant = normalizePlant({
+        id: editingId || uid('plant'),
+        title,
+        arabicName: title,
+        commonName: title,
+        scientificName,
+        family: $('#fFamily').value.trim(),
+        category,
+        classification: category,
+        description: $('#fDescription').value.trim(),
+        imageUrl: cover,
+        coverImageUrl: cover,
+        watering: $('#fWatering').value,
+        sunlight: $('#fSunlight').value,
+        temperatureRange: $('#fTemp').value.trim(),
+        careDifficulty: $('#fDifficulty').value,
+        careGuide: parseLines($('#fCare').value),
+        diseases: parseDiseases($('#fDiseases').value),
+        tags: parseTags($('#fTags').value),
+        popular: $('#fPopular').checked,
+        published: $('#fPublished').checked,
+        createdAt: existing?.createdAt || now,
+        updatedAt: now,
+        soilTypes: existing?.soilTypes || [],
+        environments: existing?.environments || [],
+        warnings: existing?.warnings || [],
+        attributes: { ...(existing?.attributes || {}), ...(soilNote ? { soilNote } : {}) },
+        suitableRegions: existing?.suitableRegions || [],
+      });
+
+      if (existing) {
+        catalog.plants = catalog.plants.map((p) => (p.id === plant.id ? plant : p));
+        toast('تم التحديث — الدليل متزامن مع الموقع.');
+      } else {
+        catalog.plants = [plant, ...catalog.plants];
+        toast('تمت الإضافة — سيظهر النبات فوراً في دليل الموقع.');
+      }
+
+      saveCatalog();
+      closeModal();
+      render();
+    }
+
+    function deletePlant(id) {
+      catalog.plants = catalog.plants.filter((p) => p.id !== id);
+      saveCatalog();
+      toast('تم الحذف من الدليل.');
+      closeConfirm();
+      render();
+    }
+
+    function filtered() {
+      const q = ($('#globalSearch').value || '').trim().toLowerCase();
+      const cat = $('#filterCategory').value || '';
+      const pub = $('#filterPublished').value ?? '';
+      return catalog.plants.filter((p) => {
+        const hay = [p.title, p.arabicName, p.commonName, p.scientificName, p.category, ...(p.tags || [])]
+          .join(' ')
+          .toLowerCase();
+        const okQ = !q || hay.includes(q);
+        const okC = !cat || p.category === cat || p.classification === cat;
+        const okP =
+          pub === '' ||
+          (pub === '1' && p.published !== false) ||
+          (pub === '0' && p.published === false);
+        return okQ && okC && okP;
+      });
+    }
+
+    function placeholderThumb() {
+      return 'data:image/svg+xml,' + encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect fill="#1e293b" width="64" height="64"/><text x="50%" y="54%" text-anchor="middle" fill="#94a3b8" font-size="18">ن</text></svg>`,
+      );
+    }
+
+    function render() {
+      const published = catalog.plants.filter((p) => p.published !== false).length;
+      const { users, identifications } = scanActivity();
+
+      $('#statPlants').textContent = String(catalog.plants.length);
+      $('#statPublished').textContent = `منشورة: ${published}`;
+      $('#statUsers').textContent = String(users);
+      $('#statIds').textContent = String(identifications);
+      $('#statUpdated').textContent = `آخر تحديث: ${fmt(catalog.updatedAt)}`;
+      $('#navCount').textContent = String(catalog.plants.length);
+
+      const filter = $('#filterCategory');
+      const cur = filter.value;
+      filter.innerHTML =
+        '<option value="">كل التصنيفات</option>' +
+        categories.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+      filter.value = cur;
+      $('#catDatalist').innerHTML = categories.map((c) => `<option value="${esc(c)}"></option>`).join('');
+
+      const recent = [...catalog.plants]
+        .sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)))
+        .slice(0, 5);
+      $('#recentList').innerHTML = recent.length
+        ? recent
+            .map(
+              (p) => `<li>
+            <div><span class="item-title">${esc(p.title || p.arabicName)}</span>
+            <span class="item-sub">${esc(p.scientificName)} · ${esc(p.category || '—')}</span></div>
+            <button type="button" class="btn btn-ghost btn-sm" data-edit="${esc(p.id)}">تعديل</button>
+          </li>`,
+            )
+            .join('')
+        : '<li><span class="item-sub">لا توجد نباتات بعد — ابدأ بالإضافة.</span></li>';
+
+      const counts = new Map();
+      for (const p of catalog.plants) {
+        const k = p.category || p.classification;
+        if (!k) continue;
+        counts.set(k, (counts.get(k) || 0) + 1);
+      }
+      $('#catCloud').innerHTML = counts.size
+        ? [...counts.entries()]
+            .map(([n, c]) => `<span class="chip">${esc(n)} <b>${c}</b></span>`)
+            .join('')
+        : '<span class="item-sub">لا تصنيفات مستخدمة بعد.</span>';
+
+      const rows = filtered();
+      const empty = $('#tableEmpty');
+      const body = $('#tableBody');
+      if (!rows.length) {
+        body.innerHTML = '';
+        empty.hidden = false;
+      } else {
+        empty.hidden = true;
+        body.innerHTML = rows
+          .map((p) => {
+            const img = p.coverImageUrl || p.imageUrl || placeholderThumb();
+            return `<tr>
+              <td><div class="plant-cell">
+                <img class="thumb" src="${esc(img)}" alt="" loading="lazy" />
+                <div><div class="item-title">${esc(p.title || p.arabicName)}</div>
+                <span class="item-sub">${esc(p.scientificName)}</span></div>
+              </div></td>
+              <td>${esc(p.category || '—')}</td>
+              <td>${esc(p.careDifficulty || '—')}</td>
+              <td><span class="badge ${p.published !== false ? 'badge-ok' : 'badge-draft'}">${
+                p.published !== false ? 'منشور' : 'مسودة'
+              }</span></td>
+              <td><div class="row-actions">
+                <button type="button" class="btn btn-ghost btn-sm" data-edit="${esc(p.id)}">تعديل</button>
+                <button type="button" class="btn btn-danger btn-sm" data-del="${esc(p.id)}" data-name="${esc(
+                  p.title || p.arabicName,
+                )}">حذف</button>
+              </div></td>
+            </tr>`;
+          })
+          .join('');
+      }
+
+      $('#catList').innerHTML = categories
+        .map((c) => {
+          const count = catalog.plants.filter((p) => p.category === c || p.classification === c).length;
+          return `<li>
+            <div><span class="item-title">${esc(c)}</span><span class="item-sub">${count} نبات مرتبط</span></div>
+            <button type="button" class="btn btn-danger btn-sm" data-del-cat="${esc(c)}">حذف</button>
+          </li>`;
+        })
+        .join('');
+
+      if (currentView === 'activity') renderActivity();
+    }
+
+    function renderActivity() {
+      const items = [];
+      for (let i = 0; i < localStorage.length; i += 1) {
+        const key = localStorage.key(i);
+        if (!key?.startsWith('spi.history.')) continue;
+        const userId = key.replace('spi.history.', '');
+        const rows = readJson(key, []);
+        if (!Array.isArray(rows)) continue;
+        for (const row of rows) {
+          items.push({
+            userId,
+            name: row.plantName || 'تعريف',
+            scientific: row.scientificName || '',
+            at: row.createdAt || '',
+            confidence: row.confidence,
+          });
+        }
+      }
+      items.sort((a, b) => String(b.at).localeCompare(String(a.at)));
+      const top = items.slice(0, 12);
+      $('#activityList').innerHTML = top.length
+        ? top
+            .map((item) => {
+              const pct =
+                typeof item.confidence === 'number'
+                  ? Math.round(item.confidence <= 1 ? item.confidence * 100 : item.confidence)
+                  : null;
+              return `<li>
+                <div><span class="item-title">${esc(item.name)}</span>
+                <span class="item-sub">${esc(item.scientific)} · ${esc(item.userId)} · ${fmt(item.at)}</span></div>
+                ${pct != null ? `<span class="badge badge-ok">${pct}%</span>` : ''}
+              </li>`;
+            })
+            .join('')
+        : '<li><span class="item-sub">لا يوجد نشاط تعريف محلي بعد.</span></li>';
+    }
+
+    function bind() {
+      $$('.nav-btn, .text-btn[data-view]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (btn.dataset.view) setView(btn.dataset.view);
+        });
+      });
+
+      $('#menuBtn').addEventListener('click', () => $('#sidebar').classList.toggle('open'));
+      $('#btnNew').addEventListener('click', () => openModal());
+      $('#btnNew2').addEventListener('click', () => openModal());
+      $('#plantForm').addEventListener('submit', upsertPlant);
+      $$('[data-close]').forEach((el) => el.addEventListener('click', closeModal));
+      $$('[data-close-confirm]').forEach((el) => el.addEventListener('click', closeConfirm));
+      $('#confirmDelete').addEventListener('click', () => {
+        if (pendingDeleteId) deletePlant(pendingDeleteId);
+      });
+
+      $('#globalSearch').addEventListener('input', () => {
+        if (currentView !== 'plants') setView('plants');
+        else render();
+      });
+      $('#filterCategory').addEventListener('change', render);
+      $('#filterPublished').addEventListener('change', render);
+
+      $('#catForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const value = $('#catInput').value.trim();
+        if (!value) return;
+        if (!categories.includes(value)) {
+          categories.push(value);
+          saveCategories();
+          toast('تمت إضافة التصنيف.');
+          render();
+        }
+        $('#catInput').value = '';
+      });
+
+      document.addEventListener('click', (e) => {
+        const edit = e.target.closest('[data-edit]');
+        if (edit) {
+          const plant = catalog.plants.find((p) => p.id === edit.dataset.edit);
+          if (plant) openModal(plant);
+          return;
+        }
+        const del = e.target.closest('[data-del]');
+        if (del) {
+          openConfirm(del.dataset.del, del.dataset.name || 'النبات');
+          return;
+        }
+        const delCat = e.target.closest('[data-del-cat]');
+        if (delCat) {
+          categories = categories.filter((c) => c !== delCat.dataset.delCat);
+          saveCategories();
+          toast('تم حذف التصنيف.');
+          render();
+        }
+      });
+
+      $('#refreshActivity').addEventListener('click', () => {
+        renderActivity();
+        toast('تم تحديث النشاط.');
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeModal();
+          closeConfirm();
+        }
+      });
+
+      window.addEventListener('storage', (e) => {
+        if (e.key === CATALOG_KEY) {
+          loadCatalog();
+          loadCategories();
+          render();
+          toast('تمت مزامنة الدليل من تبويب آخر.');
+        }
+      });
+
+      window.addEventListener('focus', () => {
+        loadCatalog();
+        loadCategories();
+        render();
+      });
+    }
+
+    function init() {
+      loadCatalog();
+      loadCategories();
+      bind();
+      setView('overview');
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+  })();
+  </script>
+</body>
+</html>
